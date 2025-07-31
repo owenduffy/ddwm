@@ -1,5 +1,7 @@
 # QRP DIGITAL RF POWER & VSWR METER - modifications of Chinese copy
 
+![Chinese copy](ddwm07.jpg)
+
 # Issues
 
 On receipt, the Chinese copy had several problems:
