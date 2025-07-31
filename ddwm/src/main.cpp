@@ -27,7 +27,7 @@
 // L:FF   H:D3   E:FD //NOTE: this specifies an external crystal as used in a Chinese copy
 // L:E2   H:D3   E:FD //NOTE: this specifies the internal RC oscillator as used in G8GYW's article
 
-#define VERSION "0.02"
+#define VERSION "0.03"
 #define READ_INTEEPROM
 //#define WRITE_INTEEPROM
 //#define CALMODE
@@ -56,9 +56,10 @@ struct{
   float pmin=0.05;
   int adcoffsadj=0;
   uint16_t flags=0;
-  float vreff=1.0718*(18+10)/10; //MeasuredAdcRef*(R3+R4)/R4
-  float vrefr=1.1225/1.1173*1.0718*(18+10)/10; //MeasuredAdcRef*(R7+R8)/R8 //adjusted to calibrate to vreff
-  float a=0.039358125429379,b=0.92716713641334,c=0.91574481497507,d=0.11403999912754;
+  //27k+10k - 4.07V
+  float vreff=1.1;
+  float vrefr=1.1;
+  float a=1.3427173743901,b=42.717777966458,c=-6.6435793546886,d=3.4365234638248;
 } parms;
 int adcpf=A0,adcpr=A1; // select the input pin for the detector
 unsigned AdcAccumulator; // variable to accumulate the value coming from the sensor
@@ -135,27 +136,30 @@ void setup(){
 
 void loop(){
   int prec;
-  int i;
+  int i,readf,readr,clip=0;
   float vinf,pwrf,vinr,pwrr,dbm;
   long AdcAccumulatorf=0,AdcAccumulatorr=0;
 
   for(i=parms.avgn;i--;){
     // read the value from the detector
-    AdcAccumulatorf+=analogRead(adcpf);
-    AdcAccumulatorr+=analogRead(adcpr);
+    readf=analogRead(adcpf);
+    readr=analogRead(adcpr);
+    AdcAccumulatorf+=readf;
+    AdcAccumulatorr+=readr;
+    if(readf>1022 || readr>1022){
+      clip=1;
+      break;
+    }
     delay(100);
     }
   // calculate average v
   vinf=((float)AdcAccumulatorf+(float)parms.adcoffsadj*(float)parms.avgn)*calfactorf;
   vinr=((float)AdcAccumulatorr+(float)parms.adcoffsadj*(float)parms.avgn)*calfactorr;
-  #if defined(CALMODE)
-  pwrf=vinf;
-  pwrr=vinr;
-  #else
-  pwrf=parms.a+parms.b*vinf+parms.c*pow(vinf,2)+parms.d*pow(vinf,3);
-  pwrr=parms.a+parms.b*vinr+parms.c*pow(vinr,2)+parms.d*pow(vinr,3);
+  #if !defined(CALMODE)
+  pwrf=pow(parms.a+parms.b*vinf+parms.c*pow(vinf,2)+parms.d*pow(vinf,3),2)/100;
+  pwrr=pow(parms.a+parms.b*vinr+parms.c*pow(vinr,2)+parms.d*pow(vinr,3),2)/100;
   #endif
-/*
+///*
   MySerial.print(F("AdcAccumulatorf: "));
   MySerial.print(AdcAccumulatorf);
   MySerial.print(F(", vinf: "));
@@ -168,52 +172,59 @@ void loop(){
   MySerial.print(vinr,10);
   MySerial.print(F(", pwrr: "));
   MySerial.println(pwrr,10);
-*/
+//*/
   //display Power and VSWR
   display.clearDisplay();
   display.setTextSize(2);
   display.setCursor (0,0);
   #if defined(CALMODE)
-  display.println(pwrf,8);
-  display.println(pwrr,8);
+  display.println(vinf,8);
+  display.println(vinr,8);
   #else
-  if(pwrf<parms.pmin){
-    pwrf=0.0;
-    dbm=-99;
-    prec=3;
+  if(clip){
+    display.setCursor(0,17);
+    display.print("! O'LOAD !");
+    delay(1000);
     }
   else{
-    dbm=10*log10(pwrf/0.001);
-    prec=4-floor(dbm/10);
-    }
-  if(pwrf>=parms.pmin){
-    prec+=1;
-    display.print(pwrf,prec);
-    display.print(F("W"));
-    }
-  else
-    display.print(F("***W"));
+    if(pwrf<parms.pmin){
+      pwrf=0.0;
+      dbm=-99;
+      prec=3;
+      }
+    else{
+      dbm=10*log10(pwrf/0.001);
+      prec=4-floor(dbm/10);
+      }
+    if(pwrf>=parms.pmin){
+      prec+=1;
+      display.print(pwrf,prec);
+      display.print(F("W"));
+      }
+    else
+      display.print(F("***W"));
 
-  if(pwrf>parms.pmin && pwrr>parms.pmin){
-    rho=sqrt(pwrr/pwrf); // Calculate reflection coefficient
-  //  MySerial.print(F(", rho: "));
-  //  MySerial.println(rho,10);
-    rho=constrain(rho,0,0.99999);
-    SWR=(1+rho)/(1-rho);
-    SWR=constrain(SWR,1,99.9);
-//    MySerial.print(F(", swr: "));
-//    MySerial.println(SWR,10);
-    int w=((SWR-1)*32)+0.5+65;
-    // Draw filled part of bar starting from left of screen:
-    display.fillRect(65,display.height()-1-barh,w,barh,1);
-    display.fillRect(w+1,display.height()-barh-1,display.width()-w,barh,0);
-    for(int i=80;i<128;i=i+16)
-      display.fillRect(i,display.height()-1-barh/4,1,barh/4,0);
-    for(int i=96;i<128;i=i+32)
-      display.fillRect(i,display.height()-1-barh/2,1,barh/2,0);
-    display.setCursor(0,17);
-    display.print(SWR,1); // Display VSWR to one decimal place
-    }
+    if(pwrf>parms.pmin && pwrr>parms.pmin){
+      rho=sqrt(pwrr/pwrf); // Calculate reflection coefficient
+    //  MySerial.print(F(", rho: "));
+    //  MySerial.println(rho,10);
+      rho=constrain(rho,0,0.99999);
+      SWR=(1+rho)/(1-rho);
+      SWR=constrain(SWR,1,99.9);
+  //    MySerial.print(F(", swr: "));
+  //    MySerial.println(SWR,10);
+      int w=((SWR-1)*32)+0.5+65;
+      // Draw filled part of bar starting from left of screen:
+      display.fillRect(65,display.height()-1-barh,w,barh,1);
+      display.fillRect(w+1,display.height()-barh-1,display.width()-w,barh,0);
+      for(int i=80;i<128;i=i+16)
+        display.fillRect(i,display.height()-1-barh/4,1,barh/4,0);
+      for(int i=96;i<128;i=i+32)
+        display.fillRect(i,display.height()-1-barh/2,1,barh/2,0);
+      display.setCursor(0,17);
+      display.print(SWR,1); // Display VSWR to one decimal place
+      }
+  }
 #endif
   display.display();
   }
