@@ -1,5 +1,7 @@
 <h2>QRP DIGITAL RF POWER & VSWR METER</h2>
 
+See also [modifications](modifications.md) applicable to this fork.
+
 <h3>INTRODUCTION</h3>
 
 Here is a design for a digital QRP RF power meter that fits in a
