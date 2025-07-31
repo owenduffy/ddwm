@@ -1,5 +1,7 @@
 <h2>QRP DIGITAL RF POWER & VSWR METER</h2>
 
+Forked from G8GYW's repo.
+
 See also [modifications](modifications.md) applicable to this fork.
 
 <h3>INTRODUCTION</h3>
