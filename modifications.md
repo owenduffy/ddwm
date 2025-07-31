@@ -7,7 +7,7 @@ On receipt, the Chinese copy had several problems:
 - displayed power was frequency dependent; and
 - displayed VSWR was power dependent.
 
-The firmware was modified to evaluation some different user interface ideas.
+The firmware was modified to evaluate some different user interface ideas.
 
 A careful calibration was conducted where power was measured and plotted against ADC count to perform a curve fit to calulate power from ADC count.
 Whilst it was good on one band, it remained frequency dependent and displayed VSWR was power dependent, less so, but room for improvement.
