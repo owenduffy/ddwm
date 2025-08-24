@@ -2,7 +2,7 @@
 
 Forked from <a href="https://g8gyw.github.io/" target="_blank">G8GYW's repo.</a>
 
-See also <a href="modifications/modifications.md" target="_blank">modifications</a> applicable to this fork
+See also <a href="modifications.md" target="_blank">modifications</a> applicable to this fork
 
 <h3>INTRODUCTION</h3>
 
