@@ -121,6 +121,12 @@ The parameters are stored in EEPROM.
 
 Parms vref and vrefr are nominally 1.1, and are tweaked for fine calibration of actual build components.
 
+This version contains a speaker and a power switch controlled by FETs and the microcontroller, so code was added to power up and shutdown using the momentary button.
+
+![complete 150W schematic](doc/schematic-150W-BB.png)
+
+The version above as modified used different transformer cores as noted.
+
 ## Result
 
 ![thermograph](doc/ddwm-100W-thermal.jpg)
@@ -131,6 +137,7 @@ InsertionVSWR and loss were measured.
 
 ![InsertionVSWR and loss](doc/100Wddwm02-m.png)
 
+The UHF series jacks were replaced with large flange BNC jacks.
 
 The issues listed were satisfactorily resolved:
 - accuracy of power is good across 1.8 to 30MHz from 500mW to 100W;
