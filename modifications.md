@@ -145,6 +145,17 @@ The issues listed were satisfactorily resolved:
 - minimum power displayed is restricted to 500mW so that garbage is not calculated, VSWR will not be calculated if Pref<500mW; and
 - VSWR accuracy is good and largely insensitive to power level.
 
+# Calibration
+
+By and large, the curve fit derived from the LTSPICE model is quite good, ie the coefficients a, b, c, and d in the EEPROM image should be fine.
+
+There is a need to calibrate for amongst other things, variation in the ADC reference and small differences in diodes and resistors etc.
+
+The recommended procedure is to connect an RF source through a known wattmeter, through this DUT to a good 50 ohm termination and write down the measured power Pm and the ddwm indication Pi. Do this in the top half of the ddwm power range.
+
+Now reverse the ddwm connections and do the same in the reflected direction.
+
+Calculate an adjusted value for vreff and vrefr respectively as vrefx'=vrefx*(Pm/Pr)^0.5. Edit the EEPROM image and write it to ddwm.
 
 # Edit EEPROM image
 
