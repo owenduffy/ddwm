@@ -146,9 +146,13 @@ The issues listed were satisfactorily resolved:
 - VSWR accuracy is good and largely insensitive to power level.
 
 
+# Edit EEPROM image
 
+If you do not have a suitable tool for editing the EEPROM binary image, this <a href="https://hexed.it/" target="_blank">online hex editor</a> might be useful:
 
+![Online hex edito](doc/hexed.it.png)
 
+Using the offsets andf formats shown in the earlier screenshots, you can select and edit the content in a range of formats, and save the edit file for loading to EEPROM.
 
 Owen Duffy
 25/08/2025
